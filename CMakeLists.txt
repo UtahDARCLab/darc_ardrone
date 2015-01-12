@@ -109,7 +109,9 @@ include_directories(
 ## Declare a cpp executable
 # add_executable(darc_ardrone_node src/darc_ardrone_node.cpp)
 add_executable(drone_control src/ardrone_controller.cpp)
+add_executable(sim_control src/sim_controller.cpp)
 add_executable(flyfromjoy src/flyfromjoy.cpp)
+
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(darc_ardrone_node darc_ardrone_generate_messages_cpp)
@@ -120,6 +122,9 @@ add_executable(flyfromjoy src/flyfromjoy.cpp)
 # )
 target_link_libraries(drone_control
 	${catkin_LIBRARIES}
+)
+target_link_libraries(sim_control
+    ${catkin_LIBRARIES}
 )
 target_link_libraries(flyfromjoy
 	${catkin_LIBRARIES}
