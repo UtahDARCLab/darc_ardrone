@@ -32,10 +32,10 @@ double Kdx = Kd, Kdy = Kd, Kdz = 1.1*Kd, Kdyaw = Kd;
 void joy_callback(const sensor_msgs::Joy& joy_msg_in)
 {
 	//Take in xbox controller
-	joy_x_=joy_msg_in.axes[1]; //left stick up-down
-	joy_y_=joy_msg_in.axes[0]; //left stick left-right
-	joy_z_=joy_msg_in.axes[4]; //right stick up-down
-	joy_yaw_ = joy_msg_in.axes[3]; //right stick left/right
+	joy_z_   =  joy_msg_in.axes[1]; //left stick up-down
+	joy_yaw_ =  joy_msg_in.axes[0]; //left stick left-right
+	joy_y_   =  joy_msg_in.axes[4]; //right stick up-down
+	joy_x_   = -joy_msg_in.axes[3]; //right stick left/right
 }
 
 // Read mocap position
@@ -104,22 +104,39 @@ int main(int argc, char** argv)
 		u_out.z = joy_z;
 		yaw_out.data = joy_yaw;
 
-		if(u_out.x < dead_zone && u_out.x > -dead_zone)
-			u_out.x = 0.0; //u_out.x = Kpx*(hold_pos.x-curr_pos.x) - Kdx*curr_vel.x;
-		//else
-		//	hold_pos.x = 1.3; //curr_pos.x;
-		if(u_out.y < dead_zone && u_out.y > -dead_zone)
-			u_out.y = 0.0; //u_out.y = Kpy*(hold_pos.y-curr_pos.y) - Kpy*curr_vel.y;
-		//else
-		//	hold_pos.y = -1.25; //curr_pos.y;
-		if(u_out.z < dead_zone && u_out.z > -dead_zone)
-			u_out.z = 0.0; //u_out.z = Kpz*(hold_pos.z-curr_pos.z) - Kdz*curr_vel.z;
-		//else
-		//	hold_pos.z = 1.3; //curr_pos.z;
-		if(joy_yaw < dead_zone && joy_yaw > -dead_zone)
-			yaw_out.data = 0.0; //yaw_out.data = Kpyaw*(hold_yaw-curr_yaw) - Kdyaw*curr_yawVel;
-		//else
-		//	hold_yaw = curr_yaw;
+		if(u_out.x < dead_zone && u_out.x > -dead_zone) {
+			u_out.x = 0.0;
+		} else if (u_out.x < 0.0) {
+			u_out.x = (u_out.x + dead_zone) / (1.0 - dead_zone);
+		} else {
+			u_out.x = (u_out.x - dead_zone) / (1.0 - dead_zone);
+		}
+		
+		if(u_out.y < dead_zone && u_out.y > -dead_zone) {
+			u_out.y = 0.0;
+		} else if (u_out.y < 0.0) {
+			u_out.y = (u_out.y + dead_zone) / (1.0 - dead_zone);
+		} else {
+			u_out.y = (u_out.y - dead_zone) / (1.0 - dead_zone);
+		}
+
+		if(u_out.z < dead_zone && u_out.z > -dead_zone) {
+			u_out.z = 0.0;
+		} else if (u_out.z < 0.0) {
+			u_out.z = (u_out.z + dead_zone) / (1.0 - dead_zone);
+		} else {
+			u_out.z = (u_out.z - dead_zone) / (1.0 - dead_zone);
+		}
+
+		
+		if(joy_yaw < 1.1*dead_zone && 1.1*joy_yaw > -dead_zone) {
+			yaw_out.data = 0.0;
+		} else if (yaw_out.data < 0.0) {
+			yaw_out.data = (yaw_out.data + dead_zone) / (1.0 - dead_zone);
+		} else {
+			yaw_out.data = (yaw_out.data - dead_zone) / (1.0 - dead_zone);
+		}
+		
 		u_pub.publish(u_out);
 		yaw_pub.publish(yaw_out);
 		ros::spinOnce();
